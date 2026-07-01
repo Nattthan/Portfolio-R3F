@@ -1,21 +1,16 @@
-# Portfolio R3F
+# React + Vite
 
-Interactive React Three Fiber portfolio for a junior Creative Developer application cycle in Europe.
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
-## Concept
+Currently, two official plugins are available:
 
-The first scene is a construction site assembling the words `UNDER CONSTRUCTION`.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
 
-- Most letters are already placed.
-- One letter is delivered by a crane.
-- One letter is pushed into position by a bulldozer.
-- The motion uses a small amount of physics and polished animation.
-- The experience then leads recruiters to projects, about, skills, contact, and CV.
+## React Compiler
 
-## Goal
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
 
-Ship a focused, memorable one-week MVP that proves creative coding taste, engineering discipline, and recruiter-friendly clarity.
+## Expanding the Oxlint configuration
 
-## Project Plan
-
-The working GitHub Project plan is documented in [docs/week-1-project-plan.md](docs/week-1-project-plan.md).
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
