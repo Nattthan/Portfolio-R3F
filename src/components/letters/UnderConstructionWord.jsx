@@ -5,6 +5,8 @@ import {
     constructionText,
     constructionWordRotation,
     getLetterPosition,
+    looseRLetterPosition,
+    looseRLetterRotation,
     looseULetterPosition,
     looseULetterRotation,
     underBasePosition,
@@ -15,6 +17,7 @@ import {
 
 export default function UnderConstructionWord ( {
     activeLetterType = "dynamic",
+    bulldozerLetterRef,
     introLetterRef,
     introLetterCollisionRef,
     missingLetterColor = "#fff1dc",
@@ -57,9 +60,12 @@ export default function UnderConstructionWord ( {
     const renderUnderLetter = ( character, index ) =>
     {
         const isIntroLetter = index === 0;
+        const isBulldozerLetter = character === "R";
         const position = isIntroLetter
             ? looseULetterPosition
-            : getLetterPosition(
+            : isBulldozerLetter
+                ? looseRLetterPosition
+                : getLetterPosition(
                 index,
                 underText,
                 underLetterSpacing,
@@ -69,12 +75,18 @@ export default function UnderConstructionWord ( {
 
         return <RigidLetter
             key={ `${ character }-${ index }` }
-            ref={ isIntroLetter ? introLetterRef : undefined }
+            ref={ isIntroLetter
+                ? introLetterRef
+                : isBulldozerLetter
+                    ? bulldozerLetterRef
+                    : undefined }
             name={ `letter-${ character.toLowerCase() }-${ index }` }
-            color={ isIntroLetter ? missingLetterColor : settledLetterColor }
+            color={ isIntroLetter || isBulldozerLetter
+                ? missingLetterColor
+                : settledLetterColor }
             fontSize={ 1 }
-            linearDamping={ isIntroLetter ? 1.6 : 0.2 }
-            angularDamping={ isIntroLetter ? 3.2 : 0.4 }
+            linearDamping={ isIntroLetter || isBulldozerLetter ? 1.6 : 0.2 }
+            angularDamping={ isIntroLetter || isBulldozerLetter ? 3.2 : 0.4 }
             letter={ character }
             onCollisionEnter={ isIntroLetter
                 ? ( payload ) => updateIntroLetterCollision( payload, true )
@@ -83,8 +95,12 @@ export default function UnderConstructionWord ( {
                 ? ( payload ) => updateIntroLetterCollision( payload, false )
                 : undefined }
             position={ position }
-            rotation={ isIntroLetter ? looseULetterRotation : underWordRotation }
-            type={ isIntroLetter ? activeLetterType : "dynamic" }
+            rotation={ isIntroLetter
+                ? looseULetterRotation
+                : isBulldozerLetter
+                    ? looseRLetterRotation
+                    : underWordRotation }
+            type={ isIntroLetter || isBulldozerLetter ? activeLetterType : "dynamic" }
         />;
     };
 

@@ -12,6 +12,8 @@ export const underWordRotation = [ 0, degrees( 0 ), 0 ];
 export const constructionWordRotation = [ 0, degrees( -20 ), 0 ];
 export const looseULetterPosition = [ -4, 0.72, 0.47 ];
 export const looseULetterRotation = underWordRotation;
+export const looseRLetterPosition = [ 3.72, 0.72, 2.15 ];
+export const looseRLetterRotation = underWordRotation;
 
 export function getLetterPosition (
     index,
