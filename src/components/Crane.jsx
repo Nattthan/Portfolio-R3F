@@ -132,6 +132,7 @@ function canGrabRigidBody ( payload )
 
     return Boolean( payload.other.rigidBody )
         && name !== "floor"
+        && name !== "bulldozer"
         && name !== "hook";
 }
 

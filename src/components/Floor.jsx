@@ -1,8 +1,9 @@
-import floorVertexShader from "../shaders/floor/vertex.glsl";
-import floorFragmentShader from "../shaders/floor/fragment.glsl";
-import * as THREE from 'three';
-import { useControls } from "leva";
+import { ContactShadows } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
+import { useControls } from "leva";
+import * as THREE from "three";
+import floorFragmentShader from "../shaders/floor/fragment.glsl";
+import floorVertexShader from "../shaders/floor/vertex.glsl";
 
 const floorDebugSettings = {
     uRadius: {
@@ -12,13 +13,13 @@ const floorDebugSettings = {
         step: 0.01
     },
     uFeather: {
-        value: 0.25,
+        value: 0.3,
         min: 0,
         max: 2,
         step: 0.01
     },
     uOpacity: {
-        value: 1.0,
+        value: 0.58,
         min: 0,
         max: 2,
         step: 0.01
@@ -59,10 +60,21 @@ export default function Floor ()
             <planeGeometry args={ [ 20, 20 ] } />
             <shadowMaterial
                 transparent
-                opacity={ 0.3 }
+                opacity={ 0.2 }
                 color={ "#0d0906" }
                 depthWrite={ false }
             />
         </mesh>
+
+        <ContactShadows
+            position={ [ 0, 0.018, 0 ] }
+            scale={ 12 }
+            opacity={ 0.18 }
+            blur={ 2.4 }
+            far={ 4 }
+            resolution={ 1024 }
+            frames={ 80 }
+            color="#0d0906"
+        />
     </>;
 }
