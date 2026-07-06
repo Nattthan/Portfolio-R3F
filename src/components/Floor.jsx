@@ -1,4 +1,3 @@
-import { ContactShadows } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
 import { useControls } from "leva";
 import * as THREE from "three";
@@ -60,21 +59,10 @@ export default function Floor ()
             <planeGeometry args={ [ 20, 20 ] } />
             <shadowMaterial
                 transparent
-                opacity={ 0.2 }
+                opacity={ 0.4 }
                 color={ "#0d0906" }
                 depthWrite={ false }
             />
         </mesh>
-
-        <ContactShadows
-            position={ [ 0, 0.018, 0 ] }
-            scale={ 12 }
-            opacity={ 0.18 }
-            blur={ 2.4 }
-            far={ 4 }
-            resolution={ 1024 }
-            frames={ 80 }
-            color="#0d0906"
-        />
     </>;
 }

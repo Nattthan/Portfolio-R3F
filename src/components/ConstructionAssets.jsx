@@ -6,12 +6,15 @@ import * as THREE from "three";
 const modelPath = "./models/Assets.glb";
 const anchoredGroupName = "asset_anchored";
 const emissiveMaterialName = "Emissive";
+const paperMaterialName = "Paper";
 
 const lightPairs = [
     {
         position: "Light1_pos",
         target: "Light1_target",
-        intensity: 100,
+        fallbackPosition: [ -3.9662227630615234, 0.12548553943634033, -1.2981266975402832 ],
+        fallbackTarget: [ -2.0870535373687744, 1.1359151601791382, -0.7054343223571777 ],
+        intensity: 90,
         distance: 4.8,
         angle: 0.56,
         positionOffset: [ 0, 0.32, 0 ],
@@ -20,8 +23,10 @@ const lightPairs = [
     {
         position: "Light2_pos",
         target: "Light2_target",
-        intensity: 100,
-        distance: 5.2,
+        fallbackPosition: [ 2.0962307453155518, 0.1257934421300888, 4.896568298339844 ],
+        fallbackTarget: [ -2.3932974338531494, 0.7473591566085815, -0.41889333724975586 ],
+        intensity: 90,
+        distance: 500.2,
         angle: 0.54,
         positionOffset: [ 0, 0.28, 0 ],
         targetY: 0.08
@@ -211,6 +216,10 @@ function prepareModelObject ( object )
         const materials = Array.isArray( child.material )
             ? child.material
             : [ child.material ];
+        const isPaperSurface = materials.some( ( material ) =>
+        {
+            return material?.name === paperMaterialName;
+        } );
 
         materials.forEach( ( material ) =>
         {
@@ -227,6 +236,12 @@ function prepareModelObject ( object )
             material.emissiveIntensity = 3.5;
             material.toneMapped = false;
         } );
+
+        if ( !isPaperSurface )
+            return;
+
+        child.castShadow = false;
+        child.receiveShadow = false;
     } );
 }
 
@@ -235,6 +250,12 @@ function getWorldPosition ( scene, name )
     return scene
         .getObjectByName( name )
         ?.getWorldPosition( new THREE.Vector3() );
+}
+
+function getWorldOrFallbackPosition ( scene, name, fallback )
+{
+    return getWorldPosition( scene, name )
+        ?? new THREE.Vector3( ...fallback );
 }
 
 function ConstructionSpotLight ( {
@@ -294,11 +315,16 @@ export default function ConstructionAssets ()
         const lights = lightPairs
             .map( ( light ) =>
             {
-                const position = getWorldPosition( model.scene, light.position );
-                const targetPosition = getWorldPosition( model.scene, light.target );
-
-                if ( !position || !targetPosition )
-                    return null;
+                const position = getWorldOrFallbackPosition(
+                    model.scene,
+                    light.position,
+                    light.fallbackPosition
+                );
+                const targetPosition = getWorldOrFallbackPosition(
+                    model.scene,
+                    light.target,
+                    light.fallbackTarget
+                );
 
                 position.add( new THREE.Vector3( ...light.positionOffset ) );
                 targetPosition.y = light.targetY;
