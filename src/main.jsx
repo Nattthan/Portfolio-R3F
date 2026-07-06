@@ -10,6 +10,11 @@ createRoot( document.getElementById( 'root' ) ).render(
     <>
       <Canvas
         shadows="percentage"
+        gl={ {
+          antialias: false,
+          powerPreference: "high-performance",
+          stencil: false
+        } }
         camera={ {
           fov: 45,
           near: 0.1,

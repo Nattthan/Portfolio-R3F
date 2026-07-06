@@ -477,16 +477,21 @@ export default function Crane ( {
             manualCrane.current.hoistOffset = introRef?.current?.hoistOffset ?? -0.25;
         }
 
-        if ( keyboardState.left )
+        const isLeftPressed = keyboardState.left || keyboardState.bulldozerLeft;
+        const isRightPressed = keyboardState.right || keyboardState.bulldozerRight;
+        const isUpPressed = keyboardState.up || keyboardState.bulldozerForward;
+        const isDownPressed = keyboardState.down || keyboardState.bulldozerBackward;
+
+        if ( isLeftPressed )
             manualCrane.current.yaw += manualYawSpeed * delta;
 
-        if ( keyboardState.right )
+        if ( isRightPressed )
             manualCrane.current.yaw -= manualYawSpeed * delta;
 
-        if ( keyboardState.up )
+        if ( isUpPressed )
             manualCrane.current.hoistOffset -= manualHoistSpeed * delta;
 
-        if ( keyboardState.down )
+        if ( isDownPressed )
             manualCrane.current.hoistOffset += manualHoistSpeed * delta;
 
         manualCrane.current.yaw = THREE.MathUtils.clamp(

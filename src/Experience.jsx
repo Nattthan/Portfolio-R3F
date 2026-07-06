@@ -1,7 +1,9 @@
-import { KeyboardControls, OrbitControls } from "@react-three/drei";
+import { KeyboardControls, OrbitControls, SpotLight } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
 import { button, useControls } from "leva";
 import { Suspense, useEffect, useRef, useState } from "react";
+import * as THREE from "three";
 import Floor from "./components/Floor";
 import Bulldozer from "./components/Bulldozer";
 import Crane from "./components/Crane";
@@ -10,6 +12,8 @@ import BloomEffect from "./components/effects/BloomEffect";
 import UnderConstructionWord from "./components/letters/UnderConstructionWord";
 import BulldozerIntroSequence from "./components/intro/BulldozerIntroSequence";
 import CraneIntroSequence from "./components/intro/CraneIntroSequence";
+import ClickableSign from "./components/ClickableSign";
+import { degToRad } from "three/src/math/MathUtils.js";
 
 const craneKeyboardMap = [
     { name: "left", keys: [ "ArrowRight" ] },
@@ -24,11 +28,60 @@ const craneKeyboardMap = [
     { name: "release", keys: [ "KeyD", "d", "D" ] }
 ];
 
+const signLights = [
+    {
+        name: "cv",
+        targetPos: [ -2, 4, 10 ],
+        lightTargetPos: [ -0.9, 0.2, 5.4 ],
+        lightTarget: new THREE.Object3D()
+    },
+    {
+        name: "portfolio",
+        targetPos: [ 2, 4, 10 ],
+        lightTargetPos: [ 0.5, 0.2, 5.4 ],
+        lightTarget: new THREE.Object3D()
+    }
+];
+
+
+function SignSpotLight ()
+{
+    return signLights.map( ( element ) =>
+    {
+        const target = element.lightTarget;
+
+        target.position.set( ...element.lightTargetPos );
+        target.updateMatrixWorld();
+
+        return (
+            <group key={ element.name }>
+                <primitive object={ target } />
+                <SpotLight
+                    color="#fff1d6"
+                    intensity={ 60 }
+                    opacity={ 0.67 }
+                    distance={ 6.75 }
+                    angle={ 0.1 }
+                    attenuation={ 6 }
+                    anglePower={ 6 }
+                    penumbra={ 1 }
+                    decay={ 1.2 }
+                    position={ element.targetPos }
+                    target={ target }
+                    castShadow={ false }
+                />
+            </group>
+        );
+    } );
+}
+
 export default function Experience ()
 {
     const [ isCraneKeyboardControlEnabled, setIsCraneKeyboardControlEnabled ] = useState( false );
     const [ isBulldozerKeyboardControlEnabled, setIsBulldozerKeyboardControlEnabled ] = useState( false );
     const [ isIntroSequenceEnabled, setIsIntroSequenceEnabled ] = useState( true );
+    const [ isIntroSequenceComplete, setIsIntroSequenceComplete ] = useState( false );
+    const isIntroSequenceCompleteRef = useRef( false );
     const craneIntroRef = useRef( {
         active: true,
         boomYaw: 0.12,
@@ -65,6 +118,9 @@ export default function Experience ()
 
     function takeCraneKeyboardControl ()
     {
+        if ( !isIntroSequenceCompleteRef.current )
+            return;
+
         stopIntroSequence();
         setIsBulldozerKeyboardControlEnabled( false );
         setIsCraneKeyboardControlEnabled( true );
@@ -72,12 +128,14 @@ export default function Experience ()
 
     function releaseCraneKeyboardControl ()
     {
-        stopIntroSequence();
         setIsCraneKeyboardControlEnabled( false );
     }
 
     function takeBulldozerKeyboardControl ()
     {
+        if ( !isIntroSequenceCompleteRef.current )
+            return;
+
         stopIntroSequence();
         setIsCraneKeyboardControlEnabled( false );
         setIsBulldozerKeyboardControlEnabled( true );
@@ -112,6 +170,21 @@ export default function Experience ()
             document.removeEventListener( "visibilitychange", updatePhysicsPaused );
         };
     }, [] );
+
+    useFrame( () =>
+    {
+        if ( isIntroSequenceComplete )
+            return;
+
+        const isComplete = craneIntroRef.current.active === false
+            && bulldozerIntroRef.current.active === false;
+
+        if ( isComplete )
+        {
+            isIntroSequenceCompleteRef.current = true;
+            setIsIntroSequenceComplete( true );
+        }
+    } );
 
     return <>
         <color args={ [ "#3b352f" ] } attach="background" />
@@ -150,10 +223,15 @@ export default function Experience ()
         />
         <pointLight
             color={ "#8fb7ff" }
-            intensity={ 0.55 }
+            intensity={ 15 }
             distance={ 8 }
             position={ [ 3.5, 2.3, -2.8 ] }
         />
+        <ambientLight
+            intensity={ 0.7 }
+            color={ '#fff1d6' }
+        />
+        <SignSpotLight />
 
         <Suspense fallback={ null }>
             <KeyboardControls map={ craneKeyboardMap }>
@@ -187,6 +265,23 @@ export default function Experience ()
                             letterRef={ introLetterRef }
                         /> }
                     <Floor />
+                    <ClickableSign
+                        label="CV"
+                        url="/CV/cv.pdf"
+                        position={ [ -0.96, 0.35, 5.5 ] }
+                        rotation={ [ 0, degToRad( 6 ), 0 ] }
+                        width={ 0.94 }
+                        height={ 0.78 }
+                    />
+
+                    <ClickableSign
+                        label="PORTFOLIO"
+                        url="http://e8fmfq0tj15x9kr3j8q4908y.46.224.211.115.sslip.io"
+                        position={ [ 0.5, 0.35, 5.46 ] }
+                        rotation={ [ 0, degToRad( -5 ), 0 ] }
+                        width={ 0.94 }
+                        height={ 0.78 }
+                    />
                 </Physics>
             </KeyboardControls>
         </Suspense>
