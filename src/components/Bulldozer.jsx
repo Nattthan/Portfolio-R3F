@@ -5,6 +5,7 @@ import { useLayoutEffect, useMemo, useRef } from "react";
 import exhaustFragmentShader from "../shaders/exhaust/fragment.glsl";
 import exhaustVertexShader from "../shaders/exhaust/vertex.glsl";
 import * as THREE from "three";
+import Cursor from "./Cursor";
 
 const modelPath = "./models/bulldozer.glb";
 const bulldozerNodeName = "bulldozer";
@@ -24,8 +25,29 @@ function getExhaustTransform ( object )
     return {
         position: [
             box.max.x,
-            center.y - size.y * 0.16,
+            center.y - size.y * 0.10,
             center.z
+        ]
+    };
+}
+
+function getControlHintTransform ( object )
+{
+    const box = new THREE.Box3().setFromObject( object );
+    const size = box.getSize( new THREE.Vector3() );
+    const center = box.getCenter( new THREE.Vector3() );
+
+    return {
+        cursorPosition: [
+            center.x ,
+            box.max.y + size.y * 0.4,
+            center.z
+        ],
+        hitboxPosition: center.toArray(),
+        hitboxSize: [
+            size.x * 1.15,
+            size.y * 1.35,
+            size.z * 1.15
         ]
     };
 }
@@ -217,13 +239,17 @@ function prepareModelObject ( object )
 
 export default function Bulldozer ( {
     introRef,
-    keyboardControlEnabled = false
+    keyboardControlEnabled = false,
+    controlEnabled = false,
+    controlHintVisible = false,
+    onToggleControl
 } )
 {
     const model = useGLTF( modelPath );
     const [ , getKeyboardState ] = useKeyboardControls();
     const body = useRef();
     const exhaustGroup = useRef();
+    const controlHintGroup = useRef();
 
     const bulldozer = useMemo( () =>
     {
@@ -254,6 +280,12 @@ export default function Bulldozer ( {
         bulldozer.object.updateMatrixWorld( true );
 
         return getExhaustTransform( bulldozer.object );
+    }, [ bulldozer.object ] );
+    const controlHintTransform = useMemo( () =>
+    {
+        bulldozer.object.updateMatrixWorld( true );
+
+        return getControlHintTransform( bulldozer.object );
     }, [ bulldozer.object ] );
 
     useLayoutEffect( () =>
@@ -321,6 +353,15 @@ export default function Bulldozer ( {
             exhaustGroup.current.quaternion.copy( bodyRotation.current );
         }
 
+        if ( controlHintGroup.current )
+        {
+            controlHintGroup.current.position.set(
+                translation.x,
+                translation.y,
+                translation.z
+            );
+        }
+
         const currentVelocity = body.current.linvel();
         const targetAngularVelocity = turnDirection * turnSpeed;
 
@@ -357,6 +398,30 @@ export default function Bulldozer ( {
             true
         );
     } );
+
+    function takeControlFromPointer ( event )
+    {
+        event.stopPropagation();
+
+        if ( !controlEnabled )
+            return;
+
+        resetPointerCursor();
+        onToggleControl?.();
+    }
+
+    function showPointerCursor ()
+    {
+        if ( !controlEnabled )
+            return;
+
+        document.body.style.cursor = "pointer";
+    }
+
+    function resetPointerCursor ()
+    {
+        document.body.style.cursor = "default";
+    }
 
     return <>
         <RigidBody
@@ -396,6 +461,35 @@ export default function Bulldozer ( {
                     vertexShader={ exhaustVertexShader }
                 />
             </points>
+        </group>
+
+        <group
+            ref={ controlHintGroup }
+            position={ bulldozer.position.toArray() }
+        >
+            <mesh
+                position={ controlHintTransform.hitboxPosition }
+                onClick={ takeControlFromPointer }
+                onPointerOver={ showPointerCursor }
+                onPointerLeave={ resetPointerCursor }
+            >
+                <boxGeometry args={ controlHintTransform.hitboxSize } />
+                <meshBasicMaterial
+                    transparent
+                    opacity={ 0 }
+                    depthWrite={ false }
+                    colorWrite={ false }
+                />
+            </mesh>
+            <Cursor
+                label="Take bulldozer control"
+                onClick={ onToggleControl }
+                position={ controlHintTransform.cursorPosition }
+                screenRotation={ 160 }
+                size={ 0.1 }
+                transform={ false }
+                visible={ controlHintVisible }
+            />
         </group>
     </>;
 }

@@ -1,7 +1,6 @@
 import { KeyboardControls, OrbitControls, SpotLight } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Physics } from "@react-three/rapier";
-import { button, useControls } from "leva";
 import { Suspense, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import Floor from "./components/Floor";
@@ -14,6 +13,7 @@ import BulldozerIntroSequence from "./components/intro/BulldozerIntroSequence";
 import CraneIntroSequence from "./components/intro/CraneIntroSequence";
 import ClickableSign from "./components/ClickableSign";
 import { degToRad } from "three/src/math/MathUtils.js";
+import Cursor from "./components/Cursor";
 
 const craneKeyboardMap = [
     { name: "left", keys: [ "ArrowRight" ] },
@@ -75,7 +75,9 @@ function SignSpotLight ()
     } );
 }
 
-export default function Experience ()
+export default function Experience ( {
+    onSelectedControlChange
+} )
 {
     const [ isCraneKeyboardControlEnabled, setIsCraneKeyboardControlEnabled ] = useState( false );
     const [ isBulldozerKeyboardControlEnabled, setIsBulldozerKeyboardControlEnabled ] = useState( false );
@@ -104,10 +106,22 @@ export default function Experience ()
     const [ physicsPaused, setPhysicsPaused ] = useState(
         document.visibilityState === "hidden"
     );
+    const selectedControl = isCraneKeyboardControlEnabled
+        ? "crane"
+        : isBulldozerKeyboardControlEnabled
+            ? "bulldozer"
+            : null;
+
+    useEffect( () =>
+    {
+        onSelectedControlChange?.( selectedControl );
+    }, [ onSelectedControlChange, selectedControl ] );
 
     function stopIntroSequence ()
     {
         setIsIntroSequenceEnabled( false );
+        isIntroSequenceCompleteRef.current = true;
+        setIsIntroSequenceComplete( true );
 
         if ( craneIntroRef.current )
             craneIntroRef.current.active = false;
@@ -118,12 +132,23 @@ export default function Experience ()
 
     function takeCraneKeyboardControl ()
     {
-        if ( !isIntroSequenceCompleteRef.current )
-            return;
-
         stopIntroSequence();
         setIsBulldozerKeyboardControlEnabled( false );
         setIsCraneKeyboardControlEnabled( true );
+    }
+
+    function toggleCraneKeyboardControl ()
+    {
+        if ( !isIntroSequenceCompleteRef.current )
+            return;
+
+        if ( isCraneKeyboardControlEnabled )
+        {
+            releaseCraneKeyboardControl();
+            return;
+        }
+
+        takeCraneKeyboardControl();
     }
 
     function releaseCraneKeyboardControl ()
@@ -133,28 +158,29 @@ export default function Experience ()
 
     function takeBulldozerKeyboardControl ()
     {
-        if ( !isIntroSequenceCompleteRef.current )
-            return;
-
         stopIntroSequence();
         setIsCraneKeyboardControlEnabled( false );
         setIsBulldozerKeyboardControlEnabled( true );
+    }
+
+    function toggleBulldozerKeyboardControl ()
+    {
+        if ( !isIntroSequenceCompleteRef.current )
+            return;
+
+        if ( isBulldozerKeyboardControlEnabled )
+        {
+            releaseBulldozerKeyboardControl();
+            return;
+        }
+
+        takeBulldozerKeyboardControl();
     }
 
     function releaseBulldozerKeyboardControl ()
     {
         setIsBulldozerKeyboardControlEnabled( false );
     }
-
-    useControls( "crane keyboard", {
-        takeControl: button( takeCraneKeyboardControl ),
-        releaseControl: button( releaseCraneKeyboardControl )
-    }, { collapsed: true } );
-
-    useControls( "bulldozer keyboard", {
-        takeControl: button( takeBulldozerKeyboardControl ),
-        releaseControl: button( releaseBulldozerKeyboardControl )
-    }, { collapsed: true } );
 
     useEffect( () =>
     {
@@ -211,7 +237,7 @@ export default function Experience ()
             intensity={ 1.85 }
             position={ [ -3.5, 5, 4 ] }
             castShadow
-            shadow-mapSize={ [ 2048, 2048 ] }
+            shadow-mapSize={ [ 1024, 1024 ] }
             shadow-camera-near={ 0.1 }
             shadow-camera-far={ 18 }
             shadow-camera-left={ -8 }
@@ -238,13 +264,19 @@ export default function Experience ()
                 <Physics paused={ physicsPaused }>
                     <ConstructionAssets />
                     <Crane
+                        controlEnabled={ isIntroSequenceComplete }
+                        controlHintVisible={ isIntroSequenceComplete && !isCraneKeyboardControlEnabled }
                         hookRef={ hookRef }
                         introRef={ craneIntroRef }
                         keyboardControlEnabled={ isCraneKeyboardControlEnabled }
+                        onToggleControl={ toggleCraneKeyboardControl }
                     />
                     <Bulldozer
+                        controlEnabled={ isIntroSequenceComplete }
+                        controlHintVisible={ isIntroSequenceComplete && !isBulldozerKeyboardControlEnabled }
                         introRef={ bulldozerIntroRef }
                         keyboardControlEnabled={ isBulldozerKeyboardControlEnabled }
+                        onToggleControl={ toggleBulldozerKeyboardControl }
                     />
                     <UnderConstructionWord
                         activeLetterType="dynamic"
@@ -273,6 +305,11 @@ export default function Experience ()
                         width={ 0.94 }
                         height={ 0.78 }
                     />
+                    <Cursor
+                        position={ [ -1.04, 0.22, 5.8 ] }
+                        rotation={ [ degToRad( -25 ), degToRad( 6 ), degToRad( -25 ) ] }
+                        size={ 0.15 }
+                    />
 
                     <ClickableSign
                         label="PORTFOLIO"
@@ -281,6 +318,11 @@ export default function Experience ()
                         rotation={ [ 0, degToRad( -5 ), 0 ] }
                         width={ 0.94 }
                         height={ 0.78 }
+                    />
+                    <Cursor
+                        position={ [ 0.36, 0.22, 5.8 ] }
+                        rotation={ [ degToRad( -25 ), degToRad( -5 ), degToRad( -25 ) ] }
+                        size={ 0.15 }
                     />
                 </Physics>
             </KeyboardControls>

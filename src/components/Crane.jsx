@@ -1,12 +1,14 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { RigidBody, useFixedJoint, useRopeJoint } from "@react-three/rapier";
+import { CuboidCollider, RigidBody, useFixedJoint, useRopeJoint } from "@react-three/rapier";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
+import Cursor from "./Cursor";
 
 const cranePosition = new THREE.Vector3( -2, 0, 0 );
 const craneRotation = [ 0, -Math.PI / 6, 0 ];
 const craneScale = 0.25;
+const craneBottomNodeName = "Crane_Bottom";
 const ropeLength = 1;
 const hookMass = 12;
 
@@ -148,16 +150,41 @@ function mix ( start, end, progress )
     return THREE.MathUtils.lerp( start, end, progress );
 }
 
+function getScaledColliderFromObject ( object, scale )
+{
+    if ( !object )
+        return null;
+
+    object.updateWorldMatrix( true, true );
+
+    const box = new THREE.Box3().setFromObject( object );
+    const size = box.getSize( new THREE.Vector3() );
+    const center = box.getCenter( new THREE.Vector3() );
+
+    return {
+        args: size.multiplyScalar( scale * 0.5 ).toArray(),
+        position: center.multiplyScalar( scale ).toArray()
+    };
+}
+
 export default function Crane ( {
     hookRef,
     introRef,
-    keyboardControlEnabled = false
+    keyboardControlEnabled = false,
+    controlEnabled = false,
+    controlHintVisible = false,
+    onToggleControl
 } )
 {
     const model = useGLTF( "./models/Crane.glb" );
     const hook = model.scene.getObjectByName( "Hook" );
     const anchor = model.scene.getObjectByName( "Cable_Anchor" );
     const rotativePart = model.scene.getObjectByName( "Crane_Top" );
+    const craneBottomCollider = useMemo( () =>
+        getScaledColliderFromObject(
+            model.scene.getObjectByName( craneBottomNodeName ),
+            craneScale
+        ), [ model.scene ] );
     const [ , getKeyboardState ] = useKeyboardControls();
 
     const cable = useRef();
@@ -639,6 +666,30 @@ export default function Crane ( {
         setManualGrab( null );
     }
 
+    function takeControlFromPointer ( event )
+    {
+        event.stopPropagation();
+
+        if ( !controlEnabled )
+            return;
+
+        resetPointerCursor();
+        onToggleControl?.();
+    }
+
+    function showPointerCursor ()
+    {
+        if ( !controlEnabled )
+            return;
+
+        document.body.style.cursor = "pointer";
+    }
+
+    function resetPointerCursor ()
+    {
+        document.body.style.cursor = "default";
+    }
+
     return <>
         <primitive
             object={ model.scene }
@@ -646,6 +697,48 @@ export default function Crane ( {
             position={ cranePosition }
             rotation={ craneRotation }
         />
+
+        { craneBottomCollider && <RigidBody
+            type="fixed"
+            colliders={ false }
+            position={ cranePosition.toArray() }
+            rotation={ craneRotation }
+        >
+            <CuboidCollider
+                args={ craneBottomCollider.args }
+                position={ craneBottomCollider.position }
+            />
+        </RigidBody> }
+
+        <mesh
+            position={ [ -2.05, 1.35, 0.05 ] }
+            rotation={ craneRotation }
+            onClick={ takeControlFromPointer }
+            onPointerOver={ showPointerCursor }
+            onPointerLeave={ resetPointerCursor }
+        >
+            <boxGeometry args={ [ 2.5, 2.8, 1.6 ] } />
+            <meshBasicMaterial
+                transparent
+                opacity={ 0 }
+                depthWrite={ false }
+                colorWrite={ false }
+            />
+        </mesh>
+
+        <Cursor
+            label="Take crane control"
+            onClick={ onToggleControl }
+            position={ [ -2.2, 2.95, 0.15 ] }
+            screenRotation={ 160 }
+            size={ 0.2 }
+            transform={ false }
+            visible={ controlHintVisible }
+        />
+
+        {/* <RigidBody type="fixed">
+            <CuboidCollider position={[-2, 0, 0]} />
+        </RigidBody> */}
 
         <mesh ref={ cable } castShadow>
             <cylinderGeometry args={ [ 0.015, 0.015, 1, 12 ] } />

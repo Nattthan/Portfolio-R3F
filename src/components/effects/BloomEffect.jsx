@@ -14,12 +14,12 @@ import {
 } from "postprocessing";
 
 const bloomSettings = {
-    intensity: 1.95,
-    levels: 8,
+    intensity: 1.65,
+    levels: 6,
     luminanceSmoothing: 2,
     luminanceThreshold: 2,
     mipmapBlur: true,
-    radius: 0.88
+    radius: 0.72
 };
 
 export default function BloomEffect ()
@@ -41,7 +41,7 @@ export default function BloomEffect ()
             radius: bloomSettings.radius
         } );
         const smaaEffect = new SMAAEffect( {
-            preset: SMAAPreset.HIGH
+            preset: SMAAPreset.MEDIUM
         } );
         const toneMappingEffect = new ToneMappingEffect( {
             mode: ToneMappingMode.AGX

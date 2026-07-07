@@ -10,8 +10,16 @@ export default function LoadingScreen ()
     const { active, progress } = useProgress();
     const [ visible, setVisible ] = useState( true );
     const [ leaving, setLeaving ] = useState( false );
+    const [ displayedProgress, setDisplayedProgress ] = useState( 0 );
     const mountedAt = useRef( performance.now() );
     const roundedProgress = Math.max( 0, Math.min( 100, Math.round( progress ) ) );
+
+    useEffect( () =>
+    {
+        setDisplayedProgress( ( currentProgress ) =>
+            Math.max( currentProgress, roundedProgress )
+        );
+    }, [ roundedProgress ] );
 
     useEffect( () =>
     {
@@ -51,10 +59,10 @@ export default function LoadingScreen ()
             <div className="loading-screen__bar" aria-hidden="true">
                 <div
                     className="loading-screen__bar-fill"
-                    style={ { transform: `scaleX(${ roundedProgress / 100 })` } }
+                    style={ { transform: `scaleX(${ displayedProgress / 100 })` } }
                 />
             </div>
-            <div className="loading-screen__progress">{ roundedProgress }%</div>
+            <div className="loading-screen__progress">{ displayedProgress }%</div>
         </div>
     </div>;
 }
