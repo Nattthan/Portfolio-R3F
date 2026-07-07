@@ -1,6 +1,27 @@
 import { forwardRef } from "react";
 import { Center, Text3D } from "@react-three/drei";
 import { RigidBody } from "@react-three/rapier";
+import * as THREE from "three";
+
+const letterMaterials = new Map();
+
+function getLetterMaterial ( color )
+{
+    const existingMaterial = letterMaterials.get( color );
+
+    if ( existingMaterial )
+        return existingMaterial;
+
+    const material = new THREE.MeshStandardMaterial( {
+        color,
+        metalness: 0.08,
+        roughness: 0.42
+    } );
+
+    letterMaterials.set( color, material );
+
+    return material;
+}
 
 const RigidLetter = forwardRef( function RigidLetter ( {
     color = "#ffd8a8",
@@ -18,6 +39,8 @@ const RigidLetter = forwardRef( function RigidLetter ( {
     type = "dynamic",
 }, ref )
 {
+    const material = getLetterMaterial( color );
+
     return <RigidBody
         ref={ ref }
         name={ name }
@@ -35,15 +58,15 @@ const RigidLetter = forwardRef( function RigidLetter ( {
                 castShadow
                 receiveShadow
                 bevelEnabled
-                bevelSize={ 0.012 }
-                bevelThickness={ 0.014 }
-                curveSegments={ 8 }
+                bevelSize={ 0.008 }
+                bevelThickness={ 0.01 }
+                curveSegments={ 4 }
                 font={ font }
                 height={ depth }
                 size={ fontSize }
+                material={material}
             >
                 { letter }
-                <meshStandardMaterial color={ color } metalness={ 0.08 } roughness={ 0.42 } />
             </Text3D>
         </Center>
     </RigidBody>;
