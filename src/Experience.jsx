@@ -305,7 +305,7 @@ export default function Experience ( {
                     <Floor />
                     <ClickableSign
                         label="CV"
-                        url="/CV/cv.pdf"
+                        url="/CV/Natthan-GUILLOT_CV.pdf"
                         position={ [ -0.96, 0.35, 5.5 ] }
                         rotation={ [ 0, degToRad( 6 ), 0 ] }
                         width={ 0.94 }
