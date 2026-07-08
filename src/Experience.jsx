@@ -43,8 +43,8 @@ const signLights = [
 ];
 
 const bulldozerInitialPose = {
-    position: [ 4.7427, 0.4554, 2.1905 ],
-    rotation: [ 0, degToRad(4), 0 ]
+    position: [ 4.7427, 0.4554, 2.1 ],
+    rotation: [ 0, degToRad( 1.0 ), 0 ]
 };
 
 
@@ -229,10 +229,10 @@ export default function Experience ( {
             minDistance={ 8 }
             maxDistance={ 12 }
             target={ [ 0, 0, 0 ] }
-            minPolarAngle={ Math.PI / 3 }
-            maxPolarAngle={ Math.PI / 2.1 }
-            minAzimuthAngle={ -Math.PI / 4 }
-            maxAzimuthAngle={ Math.PI / 4 }
+            // minPolarAngle={ Math.PI / 3 }
+            // maxPolarAngle={ Math.PI / 2.1 }
+            // minAzimuthAngle={ -Math.PI / 4 }
+            // maxAzimuthAngle={ Math.PI / 4 }
         />
 
         <hemisphereLight args={ [ "#fff1d6", "#2b2521", 0.82 ] } />

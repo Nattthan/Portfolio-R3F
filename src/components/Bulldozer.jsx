@@ -459,12 +459,12 @@ export default function Bulldozer ( {
             canSleep={ false }
             ccd
             enabledRotations={ [ false, true, false ] }
-            linearDamping={ 3.8 }
-            angularDamping={ 5.5 }
+            linearDamping={ 0 }
+            angularDamping={ 0}
             mass={ 90 }
             position={ bulldozer.position.toArray() }
             rotation={ bulldozer.rotation }
-            friction={ 1.2 }
+            friction={ 0 }
         >
             <primitive object={ bulldozer.object } />
         </RigidBody>

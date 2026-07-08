@@ -99,7 +99,7 @@ export default function BulldozerIntroSequence ( {
 
         const elapsed = elapsedTime.current;
         const letterTranslation = letterRef.current.translation();
-        const hasReachedTarget = letterTranslation.x <= rTargetPosition[ 0 ] - 0.05;
+        const hasReachedTarget = letterTranslation.x <= rTargetPosition[ 0 ];
         const hasTimedOut = elapsed >= timing.maxPush;
 
         if ( hasReachedTarget || hasTimedOut )
