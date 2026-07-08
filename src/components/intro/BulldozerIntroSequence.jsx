@@ -25,9 +25,9 @@ const timing = {
 };
 
 const pushSpeed = {
-    end: 0.16,
+    end: 0,
     start: 0.2,
-    cruise: 0.5
+    cruise: 0.35
 };
 
 const slowDownDistance = 0.4;
@@ -99,7 +99,7 @@ export default function BulldozerIntroSequence ( {
 
         const elapsed = elapsedTime.current;
         const letterTranslation = letterRef.current.translation();
-        const hasReachedTarget = letterTranslation.x <= rTargetPosition[ 0 ];
+        const hasReachedTarget = letterTranslation.x <= rTargetPosition[ 0 ] - 0.1;
         const hasTimedOut = elapsed >= timing.maxPush;
 
         if ( hasReachedTarget || hasTimedOut )

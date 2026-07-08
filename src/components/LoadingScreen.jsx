@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from "react";
 const exitDuration = 500;
 const minimumVisibleTime = 900;
 const readyHoldTime = 700;
+const loadingTitleFrames = [
+    "Building.",
+    "Building..",
+    "Building..."
+];
+const readyTitle = "Natthan | R3F Portfolio";
 
 export default function LoadingScreen ()
 {
@@ -13,6 +19,29 @@ export default function LoadingScreen ()
     const [ displayedProgress, setDisplayedProgress ] = useState( 0 );
     const mountedAt = useRef( performance.now() );
     const roundedProgress = Math.max( 0, Math.min( 100, Math.round( progress ) ) );
+
+    useEffect( () =>
+    {
+        if ( !active && progress >= 100 && leaving )
+        {
+            document.title = readyTitle;
+            return undefined;
+        }
+
+        let frameIndex = 0;
+        document.title = loadingTitleFrames[ frameIndex ];
+
+        const titleTimer = window.setInterval( () =>
+        {
+            frameIndex = ( frameIndex + 1 ) % loadingTitleFrames.length;
+            document.title = loadingTitleFrames[ frameIndex ];
+        }, 200 );
+
+        return () =>
+        {
+            window.clearInterval( titleTimer );
+        };
+    }, [ active, progress, leaving ] );
 
     useEffect( () =>
     {
