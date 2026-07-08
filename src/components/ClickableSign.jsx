@@ -1,9 +1,11 @@
 import { Text } from "@react-three/drei";
 import { degToRad } from "three/src/math/MathUtils.js";
 import Cursor from "./Cursor";
+import { trackEvent } from "../utils/analytics";
 
 export default function ClickableSign ( {
     label,
+    eventName,
     url,
     position,
     rotation,
@@ -15,6 +17,10 @@ export default function ClickableSign ( {
     function openLink ( event )
     {
         event.stopPropagation();
+        trackEvent( eventName, {
+            label,
+            url
+        } );
         window.open( url, "_blank", "noopener,noreferrer" );
     }
 

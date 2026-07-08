@@ -4,6 +4,7 @@ import { CuboidCollider, RigidBody, useFixedJoint, useRopeJoint } from "@react-t
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import Cursor from "./Cursor";
+import { trackEvent } from "../utils/analytics";
 
 const cranePosition = new THREE.Vector3( -2, 0, 0 );
 const craneRotation = [ 0, -Math.PI / 6, 0 ];
@@ -200,6 +201,7 @@ export default function Crane ( {
     const wasGrabPressed = useRef( false );
     const wasReleasePressed = useRef( false );
     const wasKeyboardControlEnabled = useRef( keyboardControlEnabled );
+    const hasTrackedKeyboardUse = useRef( false );
     const manualCrane = useRef( {
         hasStarted: false,
         hoistOffset: -0.25,
@@ -326,6 +328,7 @@ export default function Crane ( {
         if ( !wasKeyboardControlEnabled.current )
             return;
 
+        hasTrackedKeyboardUse.current = false;
         wasGrabPressed.current = false;
         wasReleasePressed.current = false;
         manualCrane.current.hasStarted = false;
@@ -344,6 +347,7 @@ export default function Crane ( {
         const keyboardState = keyboardControlEnabled
             ? getKeyboardState()
             : {};
+        trackKeyboardUse( keyboardState );
         const craneCommand = keyboardControlEnabled
             ? getManualCraneCommand( delta, keyboardState )
             : getAutomaticCraneCommand( state.clock.elapsedTime );
@@ -376,6 +380,46 @@ export default function Crane ( {
 
         wasGrabPressed.current = isGrabPressed;
         wasReleasePressed.current = isReleasePressed;
+    }
+
+    function trackKeyboardUse ( keyboardState )
+    {
+        if ( !keyboardControlEnabled || hasTrackedKeyboardUse.current )
+            return;
+
+        const command = getActiveKeyboardCommand( keyboardState );
+
+        if ( !command )
+            return;
+
+        hasTrackedKeyboardUse.current = true;
+        trackEvent( "experience_keyboard_play", {
+            control: "crane",
+            command
+        } );
+    }
+
+    function getActiveKeyboardCommand ( keyboardState )
+    {
+        if ( keyboardState.grab )
+            return "grab";
+
+        if ( keyboardState.release )
+            return "release";
+
+        if ( keyboardState.left || keyboardState.bulldozerLeft )
+            return "left";
+
+        if ( keyboardState.right || keyboardState.bulldozerRight )
+            return "right";
+
+        if ( keyboardState.up || keyboardState.bulldozerForward )
+            return "up";
+
+        if ( keyboardState.down || keyboardState.bulldozerBackward )
+            return "down";
+
+        return null;
     }
 
     function getAutomaticCraneCommand ( elapsedTime )

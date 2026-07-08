@@ -12,6 +12,7 @@ import UnderConstructionWord from "./components/letters/UnderConstructionWord";
 import BulldozerIntroSequence from "./components/intro/BulldozerIntroSequence";
 import CraneIntroSequence from "./components/intro/CraneIntroSequence";
 import ClickableSign from "./components/ClickableSign";
+import { trackEvent } from "./utils/analytics";
 import { degToRad } from "three/src/math/MathUtils.js";
 
 const craneKeyboardMap = [
@@ -136,6 +137,9 @@ export default function Experience ( {
 
     function takeCraneKeyboardControl ()
     {
+        trackEvent( "crane_control_click", {
+            action: "take_control"
+        } );
         stopIntroSequence();
         setIsBulldozerKeyboardControlEnabled( false );
         setIsCraneKeyboardControlEnabled( true );
@@ -157,11 +161,17 @@ export default function Experience ( {
 
     function releaseCraneKeyboardControl ()
     {
+        trackEvent( "crane_control_click", {
+            action: "release_control"
+        } );
         setIsCraneKeyboardControlEnabled( false );
     }
 
     function takeBulldozerKeyboardControl ()
     {
+        trackEvent( "bulldozer_control_click", {
+            action: "take_control"
+        } );
         stopIntroSequence();
         setIsCraneKeyboardControlEnabled( false );
         setIsBulldozerKeyboardControlEnabled( true );
@@ -183,6 +193,9 @@ export default function Experience ( {
 
     function releaseBulldozerKeyboardControl ()
     {
+        trackEvent( "bulldozer_control_click", {
+            action: "release_control"
+        } );
         setIsBulldozerKeyboardControlEnabled( false );
     }
 
@@ -305,6 +318,7 @@ export default function Experience ( {
                     <Floor />
                     <ClickableSign
                         label="CV"
+                        eventName="cv_sign_click"
                         url="/CV/Natthan-GUILLOT_CV.pdf"
                         position={ [ -0.96, 0.35, 5.5 ] }
                         rotation={ [ 0, degToRad( 6 ), 0 ] }
@@ -315,6 +329,7 @@ export default function Experience ( {
 
                     <ClickableSign
                         label="PORTFOLIO"
+                        eventName="portfolio_sign_click"
                         url="http://e8fmfq0tj15x9kr3j8q4908y.46.224.211.115.sslip.io"
                         position={ [ 0.5, 0.35, 5.46 ] }
                         rotation={ [ 0, degToRad( -5 ), 0 ] }

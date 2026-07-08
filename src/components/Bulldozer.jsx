@@ -1,11 +1,12 @@
 import { useGLTF, useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { RigidBody } from "@react-three/rapier";
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import exhaustFragmentShader from "../shaders/exhaust/fragment.glsl";
 import exhaustVertexShader from "../shaders/exhaust/vertex.glsl";
 import * as THREE from "three";
 import Cursor from "./Cursor";
+import { trackEvent } from "../utils/analytics";
 
 const modelPath = "./models/bulldozer.glb";
 const bulldozerNodeName = "bulldozer";
@@ -256,6 +257,7 @@ export default function Bulldozer ( {
     const body = useRef();
     const exhaustGroup = useRef();
     const controlHintGroup = useRef();
+    const hasTrackedKeyboardUse = useRef( false );
 
     const bulldozer = useMemo( () =>
     {
@@ -305,6 +307,12 @@ export default function Bulldozer ( {
         prepareModelObject( bulldozer.object );
     }, [ bulldozer.object ] );
 
+    useEffect( () =>
+    {
+        if ( !keyboardControlEnabled )
+            hasTrackedKeyboardUse.current = false;
+    }, [ keyboardControlEnabled ] );
+
     useFrame( ( state, delta ) =>
     {
         const introCommand = !keyboardControlEnabled && introRef?.current?.active
@@ -317,6 +325,12 @@ export default function Bulldozer ( {
             - ( keyboardState.bulldozerRight ? 1 : 0 );
         const keyboardMoveDirection = ( keyboardState.bulldozerForward ? 1 : 0 )
             - ( keyboardState.bulldozerBackward ? 1 : 0 );
+
+        trackKeyboardUse(
+            keyboardTurnDirection,
+            keyboardMoveDirection
+        );
+
         const turnDirection = keyboardControlEnabled
             ? keyboardTurnDirection
             : introCommand?.turnDirection ?? 0;
@@ -448,6 +462,35 @@ export default function Bulldozer ( {
     function resetPointerCursor ()
     {
         document.body.style.cursor = "default";
+    }
+
+    function trackKeyboardUse ( turnDirection, moveDirection )
+    {
+        if ( !keyboardControlEnabled || hasTrackedKeyboardUse.current )
+            return;
+
+        if ( turnDirection === 0 && moveDirection === 0 )
+            return;
+
+        hasTrackedKeyboardUse.current = true;
+        trackEvent( "experience_keyboard_play", {
+            control: "bulldozer",
+            command: getActiveKeyboardCommand( turnDirection, moveDirection )
+        } );
+    }
+
+    function getActiveKeyboardCommand ( turnDirection, moveDirection )
+    {
+        if ( moveDirection > 0 )
+            return "forward";
+
+        if ( moveDirection < 0 )
+            return "backward";
+
+        if ( turnDirection > 0 )
+            return "left";
+
+        return "right";
     }
 
     return <>
