@@ -330,7 +330,7 @@ export default function Experience ( {
                     <ClickableSign
                         label="PORTFOLIO"
                         eventName="portfolio_sign_click"
-                        url="http://e8fmfq0tj15x9kr3j8q4908y.46.224.211.115.sslip.io"
+                        url="https://old-portfolio.nguillot.fr"
                         position={ [ 0.5, 0.35, 5.46 ] }
                         rotation={ [ 0, degToRad( -5 ), 0 ] }
                         width={ 0.94 }
