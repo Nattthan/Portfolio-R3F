@@ -198,11 +198,15 @@ function updateExhaustSystem ( exhaustSystem, delta, activity )
     sizeAttribute.needsUpdate = true;
 }
 
-function cloneForRigidBody ( object )
+function cloneForRigidBody ( object, initialPosition, initialRotation )
 {
     const clone = object.clone( true );
-    const position = object.position.clone();
-    const rotation = object.rotation.toArray().slice( 0, 3 );
+    const position = initialPosition
+        ? new THREE.Vector3( ...initialPosition )
+        : object.position.clone();
+    const rotation = initialRotation
+        ? [ ...initialRotation ]
+        : object.rotation.toArray().slice( 0, 3 );
 
     clone.position.set( 0, 0, 0 );
     clone.rotation.set( 0, 0, 0 );
@@ -239,6 +243,8 @@ function prepareModelObject ( object )
 
 export default function Bulldozer ( {
     introRef,
+    initialPosition,
+    initialRotation,
     keyboardControlEnabled = false,
     controlEnabled = false,
     controlHintVisible = false,
@@ -257,11 +263,17 @@ export default function Bulldozer ( {
             ?? model.scene.children[ 0 ]
             ?? model.scene;
 
-        return cloneForRigidBody( source );
-    }, [ model.scene ] );
+        return cloneForRigidBody( source, initialPosition, initialRotation );
+    }, [ initialPosition, initialRotation, model.scene ] );
 
     const direction = useRef( new THREE.Vector3() );
     const bodyRotation = useRef( new THREE.Quaternion() );
+    const introRotation = useMemo( () =>
+    {
+        return new THREE.Quaternion().setFromEuler(
+            new THREE.Euler( ...bulldozer.rotation )
+        );
+    }, [ bulldozer.rotation ] );
     const exhaustActivity = useRef( 0.58 );
     const exhaustUniforms = useMemo( () =>
     {
@@ -343,6 +355,20 @@ export default function Bulldozer ( {
             rotation.w
         );
 
+        if ( introCommand )
+        {
+            bodyRotation.current.copy( introRotation );
+            body.current.setRotation(
+                {
+                    x: introRotation.x,
+                    y: introRotation.y,
+                    z: introRotation.z,
+                    w: introRotation.w
+                },
+                true
+            );
+        }
+
         if ( exhaustGroup.current )
         {
             exhaustGroup.current.position.set(
@@ -360,6 +386,7 @@ export default function Bulldozer ( {
                 translation.y,
                 translation.z
             );
+            controlHintGroup.current.quaternion.copy( bodyRotation.current );
         }
 
         const currentVelocity = body.current.linvel();
@@ -466,6 +493,7 @@ export default function Bulldozer ( {
         <group
             ref={ controlHintGroup }
             position={ bulldozer.position.toArray() }
+            rotation={ bulldozer.rotation }
         >
             <mesh
                 position={ controlHintTransform.hitboxPosition }

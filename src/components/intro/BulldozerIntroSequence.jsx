@@ -78,16 +78,11 @@ export default function BulldozerIntroSequence ( {
     letterRef
 } )
 {
-    const startTime = useRef( null );
+    const elapsedTime = useRef( 0 );
     const hasCompletedSequence = useRef( false );
 
-    useFrame( ( state ) =>
+    useFrame( ( _, delta ) =>
     {
-        const now = state.clock.elapsedTime;
-
-        if ( startTime.current === null )
-            startTime.current = now;
-
         if ( !letterRef.current || hasCompletedSequence.current )
         {
             applyBulldozerCommand( bulldozerIntroRef, {
@@ -100,7 +95,9 @@ export default function BulldozerIntroSequence ( {
             return;
         }
 
-        const elapsed = now - startTime.current;
+        elapsedTime.current += delta;
+
+        const elapsed = elapsedTime.current;
         const letterTranslation = letterRef.current.translation();
         const hasReachedTarget = letterTranslation.x <= rTargetPosition[ 0 ] - 0.05;
         const hasTimedOut = elapsed >= timing.maxPush;
@@ -138,7 +135,7 @@ export default function BulldozerIntroSequence ( {
             activity: 0.94,
             moveDirection: 1,
             speed: getPushSpeed( pushElapsed, letterTranslation.x ),
-            turnDirection: 0.033
+            turnDirection: 0
         } );
     } );
 

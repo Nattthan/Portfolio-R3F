@@ -13,7 +13,6 @@ import BulldozerIntroSequence from "./components/intro/BulldozerIntroSequence";
 import CraneIntroSequence from "./components/intro/CraneIntroSequence";
 import ClickableSign from "./components/ClickableSign";
 import { degToRad } from "three/src/math/MathUtils.js";
-import Cursor from "./components/Cursor";
 
 const craneKeyboardMap = [
     { name: "left", keys: [ "ArrowRight" ] },
@@ -42,6 +41,11 @@ const signLights = [
         lightTarget: new THREE.Object3D()
     }
 ];
+
+const bulldozerInitialPose = {
+    position: [ 4.7427, 0.4554, 2.1905 ],
+    rotation: [ 0, degToRad(4), 0 ]
+};
 
 
 function SignSpotLight ()
@@ -274,6 +278,8 @@ export default function Experience ( {
                     <Bulldozer
                         controlEnabled={ isIntroSequenceComplete }
                         controlHintVisible={ isIntroSequenceComplete && !isBulldozerKeyboardControlEnabled }
+                        initialPosition={ bulldozerInitialPose.position }
+                        initialRotation={ bulldozerInitialPose.rotation }
                         introRef={ bulldozerIntroRef }
                         keyboardControlEnabled={ isBulldozerKeyboardControlEnabled }
                         onToggleControl={ toggleBulldozerKeyboardControl }
@@ -304,11 +310,7 @@ export default function Experience ( {
                         rotation={ [ 0, degToRad( 6 ), 0 ] }
                         width={ 0.94 }
                         height={ 0.78 }
-                    />
-                    <Cursor
-                        position={ [ -1.04, 0.22, 5.8 ] }
-                        rotation={ [ degToRad( -25 ), degToRad( 6 ), degToRad( -25 ) ] }
-                        size={ 0.15 }
+                        cursorPosition={ [ -0.08, -0.13, 0.34 ] }
                     />
 
                     <ClickableSign
@@ -318,11 +320,7 @@ export default function Experience ( {
                         rotation={ [ 0, degToRad( -5 ), 0 ] }
                         width={ 0.94 }
                         height={ 0.78 }
-                    />
-                    <Cursor
-                        position={ [ 0.36, 0.22, 5.8 ] }
-                        rotation={ [ degToRad( -25 ), degToRad( -5 ), degToRad( -25 ) ] }
-                        size={ 0.15 }
+                        cursorPosition={ [ -0.14, -0.13, 0.34 ] }
                     />
                 </Physics>
             </KeyboardControls>

@@ -1,5 +1,6 @@
 import { Text } from "@react-three/drei";
 import { degToRad } from "three/src/math/MathUtils.js";
+import Cursor from "./Cursor";
 
 export default function ClickableSign ( {
     label,
@@ -7,7 +8,8 @@ export default function ClickableSign ( {
     position,
     rotation,
     width = 1.3,
-    height = 1
+    height = 1,
+    cursorPosition
 } )
 {
     function openLink ( event )
@@ -39,6 +41,13 @@ export default function ClickableSign ( {
             >
                 { label }
             </Text>
+
+            { cursorPosition &&
+                <Cursor
+                    position={ cursorPosition }
+                    rotation={ [ degToRad( -25 ), 0, degToRad( -25 ) ] }
+                    size={ 0.15 }
+                /> }
         </group>
     </>;
 }
