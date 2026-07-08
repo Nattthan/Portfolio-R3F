@@ -1,4 +1,4 @@
-import { RigidBody } from "@react-three/rapier";
+import { CuboidCollider, RigidBody } from "@react-three/rapier";
 import { useControls } from "leva";
 import * as THREE from "three";
 import floorFragmentShader from "../shaders/floor/fragment.glsl";
@@ -48,6 +48,13 @@ export default function Floor ()
                     uniforms={ floorUniforms }
                 />
             </mesh>
+        </RigidBody>
+
+        <RigidBody name="walls" type="fixed" colliders={false}>
+            <CuboidCollider args={[0.25, 1, 10]} position={[-10, 1, 0]}/>
+            <CuboidCollider args={[0.25, 1, 10]} position={[10, 1, 0]}/>
+            <CuboidCollider args={[10, 1, 0.25]} position={[0, 1, -10]}/>
+            <CuboidCollider args={[10, 1, 0.25]} position={[0, 1, 10]}/>
         </RigidBody>
 
         <mesh

@@ -136,7 +136,8 @@ function canGrabRigidBody ( payload )
     return Boolean( payload.other.rigidBody )
         && name !== "floor"
         && name !== "bulldozer"
-        && name !== "hook";
+        && name !== "hook"
+        && name !== "walls";
 }
 
 function getSmoothProgress ( elapsed, duration )

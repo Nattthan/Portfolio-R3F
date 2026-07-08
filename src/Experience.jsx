@@ -242,8 +242,8 @@ export default function Experience ( {
             minDistance={ 8 }
             maxDistance={ 12 }
             target={ [ 0, 0, 0 ] }
-            // minPolarAngle={ Math.PI / 3 }
-            // maxPolarAngle={ Math.PI / 2.1 }
+            minPolarAngle={ Math.PI / 3 }
+            maxPolarAngle={ Math.PI / 2.1 }
             // minAzimuthAngle={ -Math.PI / 4 }
             // maxAzimuthAngle={ Math.PI / 4 }
         />
@@ -278,7 +278,7 @@ export default function Experience ( {
 
         <Suspense fallback={ null }>
             <KeyboardControls map={ craneKeyboardMap }>
-                <Physics paused={ physicsPaused }>
+                <Physics debug paused={ physicsPaused }>
                     <ConstructionAssets />
                     <Crane
                         controlEnabled={ isIntroSequenceComplete }
