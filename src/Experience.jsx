@@ -278,7 +278,7 @@ export default function Experience ( {
 
         <Suspense fallback={ null }>
             <KeyboardControls map={ craneKeyboardMap }>
-                <Physics debug paused={ physicsPaused }>
+                <Physics paused={ physicsPaused }>
                     <ConstructionAssets />
                     <Crane
                         controlEnabled={ isIntroSequenceComplete }
