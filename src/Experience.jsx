@@ -14,6 +14,7 @@ import CraneIntroSequence from "./components/intro/CraneIntroSequence";
 import ClickableSign from "./components/ClickableSign";
 import { trackEvent } from "./utils/analytics";
 import { degToRad } from "three/src/math/MathUtils.js";
+import Worker from "./components/Worker";
 
 const craneKeyboardMap = [
     { name: "left", keys: [ "ArrowRight" ] },
@@ -46,6 +47,12 @@ const signLights = [
 const bulldozerInitialPose = {
     position: [ 4.7427, 0.4554, 2.1 ],
     rotation: [ 0, degToRad( 1.0 ), 0 ]
+};
+
+const { workerPos, workerRot, workerScale } = {
+    workerPos: [ 2.1, 0, 5.6 ],
+    workerRot: [ 0, degToRad( -25 ), 0 ],
+    workerScale: 0.5
 };
 
 
@@ -279,6 +286,7 @@ export default function Experience ( {
         <Suspense fallback={ null }>
             <KeyboardControls map={ craneKeyboardMap }>
                 <Physics paused={ physicsPaused }>
+                    <Worker position={ workerPos } rotation={ workerRot } size={ workerScale } />
                     <ConstructionAssets />
                     <Crane
                         controlEnabled={ isIntroSequenceComplete }
